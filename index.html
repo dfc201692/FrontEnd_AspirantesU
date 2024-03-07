@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Aspirante</title>
+    <!-- Enlaces a Bootstrap CSS y JavaScript, y otras dependencias -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="container mt-4">
+
+<h2 class="mb-4">Registrar Aspirante</h2>
+
+<form id="registroAspiranteForm">
+    <!-- Información personal del aspirante -->
+    <div class="form-group">
+        <label for="nombres">Nombres:</label>
+        <input type="text" class="form-control" id="nombres" name="nombres" required>
+    </div>
+
+    <div class="form-group">
+        <label for="apellidos">Apellidos:</label>
+        <input type="text" class="form-control" id="apellidos" name="apellidos" required>
+    </div>
+
+    <div class="form-group">
+        <label for="tipoDocumento">Tipo de Documento:</label>
+        <select class="form-control" id="tipoDocumento" name="tipoDocumento" required>
+            <!-- Opciones para los tipos de documento -->
+            <option value="cc">Cédula de Ciudadanía</option>
+            <option value="ti">Tarjeta de Identidad</option>
+            <option value="ps">Pasaporte</option>
+            <!-- Agrega más opciones según sea necesario -->
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="numeroDocumento">Número de Documento:</label>
+        <input type="text" class="form-control" id="numeroDocumento" name="numeroDocumento" required>
+    </div>
+
+    <div class="form-group">
+        <label for="correo">Correo Electrónico:</label>
+        <input type="email" class="form-control" id="correo" name="correo" required>
+    </div>
+
+    <div class="form-group">
+        <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+        <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" required>
+    </div>
+
+    <div class="form-group">
+        <label for="programaAcademico">Seleccionar Programa Académico:</label>
+        <select class="form-control" id="programaAcademico" required>
+            <!-- Opciones de programas académicos se cargarán dinámicamente -->
+        </select>
+    </div>
+
+    <!-- Otros campos según tus necesidades -->
+
+    <!-- Botón para enviar el formulario -->
+    <button type="button" class="btn btn-primary" onclick="registrarAspirante()">Registrar Aspirante</button>
+</form>
+
+<!-- Mensajes de éxito y error -->
+<div id="mensajeExito" class="alert alert-success" style="display: none;">Aspirante registrado exitosamente.</div>
+<div id="mensajeError" class="alert alert-danger" style="display: none;">Error al registrar el aspirante.</div>
+
+<script>
+// Función para cargar programas académicos y asignar manejadores de eventos
+$(document).ready(function () {
+    cargarProgramasAcademicos();
+});
+
+// Función para cargar programas académicos en el campo de selección
+function cargarProgramasAcademicos() {
+    axios.get('http://localhost:8080/api/programas-academicos')
+        .then(function (response) {
+            var selectProgramaAcademico = $('#programaAcademico');
+            selectProgramaAcademico.empty(); // Limpiar contenido anterior
+
+            response.data.forEach(function (programaAcademico) {
+                selectProgramaAcademico.append('<option value="' + programaAcademico.id + '" data-nombre="' + programaAcademico.nombre + '">' + programaAcademico.nombre + '</option>');
+            });
+        })
+        .catch(function (error) {
+            console.error('Error en la solicitud AJAX:', error);
+            alert('Error al cargar programas académicos');
+        });
+}
+
+// Función para registrar aspirante
+function registrarAspirante() {
+    // Obtener los datos del formulario
+    var nombres = $('#nombres').val();
+    var apellidos = $('#apellidos').val();
+    var tipoDocumento = $('#tipoDocumento').val();
+    var numeroDocumento = $('#numeroDocumento').val();
+    var correo = $('#correo').val();
+    var fechaNacimiento = $('#fechaNacimiento').val();
+    var programaAcademicoId = $('#programaAcademico').val();
+
+    // Crear el objeto con los datos
+    var datosAspirante = {
+        nombres: nombres,
+        apellidos: apellidos,
+        tipoDocumento: tipoDocumento,
+        numeroDocumento: numeroDocumento,
+        correoElectronico: correo,
+        fechaNacimiento: fechaNacimiento,
+        programaAcademicoId: programaAcademicoId
+        // Agregar otros campos según sea necesario
+    };
+
+    // Enviar los datos al backend a través de la API Rest
+    axios.post('http://localhost:8080/api/aspirantes', datosAspirante)
+        .then(function (response) {
+            console.log(response.data);
+            // Mostrar mensaje de éxito
+            $('#mensajeExito').show();
+            $('#mensajeError').hide();
+            // Aquí puedes manejar la respuesta del backend, redireccionar, mostrar mensajes, etc.
+        })
+        .catch(function (error) {
+            console.error(error);
+            // Mostrar mensaje de error
+            $('#mensajeExito').hide();
+            $('#mensajeError').show();
+            // Manejar errores si es necesario
+        });
+}
+</script>
+
+</body>
+</html>

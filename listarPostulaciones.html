@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <title>Listar Postulaciones y Registrar Aspirante</title>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- Vista para Listar Postulaciones -->
+        <div class="col-md-8">
+            <!-- Agrega un nuevo div para el formulario de filtrado -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Listar Postulaciones de Aspirantes</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="programaAcademicoFilter">Filtrar por Programa Académico:</label>
+                        <select class="form-control" id="programaAcademicoFilter" onchange="filtrarPorPrograma()">
+                            <option value="1">Ingeniería de Sistemas</option>
+                            <option value="2">Ciencias de la Computación</option>
+                            <option value="3">Administración de Empresas</option>
+                        </select>
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nombres</th>
+                                <th>Apellidos</th>
+                                <th>Tipo Documento</th>
+                                <th>Número Documento</th>
+                                <th>Correo Electrónico</th>
+                                <th>Programa Académico</th>
+                            </tr>
+                        </thead>
+                        <tbody id="postulacionesList">
+                            <!-- Aquí se mostrarán las postulaciones -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incluye la versión completa de jQuery antes de las otras bibliotecas -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    // Nueva función para filtrar postulaciones por programa
+    function filtrarPorPrograma() {
+        var programaSeleccionado = $('#programaAcademicoFilter').val();
+        cargarPostulaciones(programaSeleccionado);
+    }
+
+    // Modificamos la función cargarPostulaciones para aceptar un parámetro opcional (programaId)
+    function cargarPostulaciones(programaId) {
+        var url = 'http://localhost:8080/api/postulaciones';
+
+        // Si se proporciona un programaId, se agrega a la URL
+        if (programaId) {
+            url += '/programa/' + programaId;
+        }
+
+        $.ajax({
+            type: 'GET',
+            url: url,
+            success: function (postulaciones) {
+                mostrarPostulaciones(postulaciones);
+            },
+            error: function () {
+                alert('Error al cargar postulaciones');
+            }
+        });
+    }
+
+    // Función para mostrar las postulaciones en la página
+    function mostrarPostulaciones(postulaciones) {
+        var postulacionesList = $('#postulacionesList');
+        postulacionesList.empty(); // Limpiar contenido anterior
+
+        if (postulaciones.length === 0) {
+            postulacionesList.append('<tr><td colspan="6">No hay postulaciones.</td></tr>');
+        } else {
+            postulaciones.forEach(function (postulacion) {
+                postulacionesList.append('<tr>' +
+                    '<td>' + postulacion.aspirante.nombres + '</td>' +
+                    '<td>' + postulacion.aspirante.apellidos + '</td>' +
+                    '<td>' + postulacion.aspirante.tipoDocumento + '</td>' +
+                    '<td>' + postulacion.aspirante.numeroDocumento + '</td>' +
+                    '<td>' + postulacion.aspirante.correoElectronico + '</td>' +
+                    '<td>' + postulacion.programaAcademico.nombre + '</td>' +
+                    '</tr>');
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
